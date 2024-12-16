@@ -14,5 +14,6 @@
 
 ![Basic Window Init](./img/basic.jpg)
 
-Тестовая гифка
-![test gif](./img/test_gif.gif)
+Примерный ожидаемый результат работы:
+
+![reference](./img/reference.gif)
