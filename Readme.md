@@ -17,3 +17,11 @@
 Примерный ожидаемый результат работы:
 
 ![reference](./img/reference.gif)
+
+Пример docx
+
+[pdf](./res/lab3_SPP.pdf)
+
+Пример docx
+
+[docx](./res/Теория%20Информации.docx)
