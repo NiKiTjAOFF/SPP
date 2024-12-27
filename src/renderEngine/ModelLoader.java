@@ -1,12 +1,18 @@
 package renderEngine;
 
+import models.RawModel;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureLoader;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,14 +20,29 @@ import java.util.List;
 public class ModelLoader {
     private List<Integer> vaos = new ArrayList<>();//Хранилище VAO
     private List<Integer> vbos = new ArrayList<>();//Хранилище VBO
-    private static final int VERTEX_DATA_AMOUNT = 3;
+    private List<Integer> textures = new ArrayList<>();//Хранилище текстур
 
     //Получает позиции вершин 3д модели, состоящих из 3 координат: x, y, z
-    public RawModel loadToVAO(float[] positions){
+    public RawModel loadToVAO(float[] positions, float[] textureCoords, int[] indices){
         int vaoID = createVAO();
-        storeDataInAttributeList(0, positions);
+        bindIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(1, 2, textureCoords);
         unbindVAO();
-        return new RawModel(vaoID, positions.length / VERTEX_DATA_AMOUNT);
+        return new RawModel(vaoID, indices.length);
+    }
+
+    //Загрузка картинки из файла при помощи slickUtils
+    public int loadTexture(String fileName) {
+        Texture texture = null;
+        try {
+            texture = TextureLoader.getTexture("PNG", new FileInputStream("res/" + fileName + ".png"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        int textureID = texture.getTextureID();
+        textures.add(textureID);
+        return  textureID;
     }
 
     //Очистить все VBO и VAO
@@ -31,6 +52,9 @@ public class ModelLoader {
         }
         for(int vbo:vbos){
             GL15.glDeleteBuffers(vbo);//Удаление VBO
+        }
+        for(int texture:textures){
+            GL11.glDeleteTextures(texture);//Удаление текстур
         }
     }
 
@@ -43,7 +67,7 @@ public class ModelLoader {
     }
 
     //Добавление атрибута в VAO
-    private void storeDataInAttributeList(int attributeNumber, float[] data){
+    private void storeDataInAttributeList(int attributeNumber, int coordinateSize, float[] data){
         int vboID = GL15.glGenBuffers();//Создание хранилища данных VBO
         vbos.add(vboID);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboID);//Активация VBO, типа ARRAY_BUFFER
@@ -51,18 +75,34 @@ public class ModelLoader {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);//Заполнение VBO типом ARRAY_BUFFER и указываем, что данные не меняются больше
 
         //Добавление данного VBO в атрибут VAO под указанным номером attributeNumber;
-        //размером данных, описывающих данный атрибут VERTEX_DATA_AMOUNT;
+        //размером данных, описывающих данный атрибут coordinateSize;
         //тип данных - GL_FLOAT;
         //в нашем случае данные не нормализованы - false;
         //в нашем буфере нет дополнительных атрибутов, пропускать следующее количество нет необходимотси - 0
         //в нашем буфере данные начинаются с начала массива, отступать нет необходимости - 0
-        GL20.glVertexAttribPointer(attributeNumber, VERTEX_DATA_AMOUNT, GL11.GL_FLOAT, false, 0, 0);
+        GL20.glVertexAttribPointer(attributeNumber, coordinateSize, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);//Деактивация текущего VBO
     }
 
     //Удаление VAO
     private void unbindVAO(){
         GL30.glBindVertexArray(0);//Деактивация текущего VAO
+    }
+
+    //Создание буфера индексов вершин
+    private void bindIndicesBuffer(int[] indices){
+        int vboID = GL15.glGenBuffers();
+        vbos.add(vboID);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, vboID);//В текущем случае тип - массив элементов
+        IntBuffer buffer = storeDataInIntBuffer(indices);
+        GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+    }
+
+    private IntBuffer storeDataInIntBuffer(int[] data){
+        IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
     }
 
     //Преобразование массива координат в тип FloatBuffer

@@ -1,4 +1,4 @@
-package renderEngine;
+package models;
 
 //Представление 3д модели в памяти
 public class RawModel {
