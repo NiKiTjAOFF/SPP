@@ -3,6 +3,7 @@ package renderEngine;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.*;
 
+//Упрвление дисплеем (создание, обновление, удаление)
 public class DisplayManager {
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
