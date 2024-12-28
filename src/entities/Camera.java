@@ -9,22 +9,45 @@ public class Camera {
     private float pitch;
     private float yaw;
     private float roll;
+    private final float PITCH_LIMIT = 90;
 
     public Camera() {}
 
     public void move() {
+        final float CAMERA_SPEED = 0.2f;
         if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
-            position.z -= 0.02f;
+            position.z -= CAMERA_SPEED;
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
-            position.z += 0.02f;
+        else if(Keyboard.isKeyDown(Keyboard.KEY_S)) {
+            position.z += CAMERA_SPEED;
         }
         if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
-            position.x += 0.02f;
+            position.x += CAMERA_SPEED;
         }
-        if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
-            position.x -= 0.02f;
+        else if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+            position.x -= CAMERA_SPEED;
         }
+        if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+            position.y -= CAMERA_SPEED;
+        }
+        else if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+            position.y += CAMERA_SPEED;
+        }
+
+//        float yawChange = Mouse.getDX() * 0.1f;
+//        yaw += yawChange;
+        if(Mouse.isButtonDown(0)) {
+            float pitchChange = Mouse.getDY() * 0.1f;
+            pitch += pitchChange;
+            if(pitch > PITCH_LIMIT) {
+                pitch = PITCH_LIMIT;
+            }
+            if(pitch < -PITCH_LIMIT) {
+                pitch = PITCH_LIMIT;
+            }
+        }
+
+
     }
     public Vector3f getPosition() {
         return position;

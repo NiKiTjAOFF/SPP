@@ -1,8 +1,12 @@
 package EngineTester;
 
+import Particles.Particle;
+import Particles.ParticleMaster;
+import Particles.ParticleSystem;
 import entities.Camera;
 import entities.Entity;
 import models.TexturedModel;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
@@ -12,12 +16,15 @@ import models.RawModel;
 import shaders.StaticShader;
 import textures.ModelTexture;
 
+import java.security.Key;
+
 public class MainGameLoop {
     public static void main(String[] args) {
         DisplayManager.createDisplay();
         ModelLoader loader = new ModelLoader();
-        StaticShader shader = new StaticShader();
-        ModelRenderer renderer = new ModelRenderer(shader);
+        StaticShader modelShader = new StaticShader();
+        ModelRenderer renderer = new ModelRenderer(modelShader);
+        ParticleMaster.init(loader, renderer.getProjectionMatrix());
 
         //Вершины для отрисовки квадрата. Квадрат - 2 полигона, для которых вершины указываются против часовой стрелки.
         //Поэтому указываем левую верхнюю, левую нижнюю, правую верхнюю. После правую верхнюю, левую нижнюю, правую нижнюю.
@@ -45,6 +52,31 @@ public class MainGameLoop {
         Entity entity = new Entity(texturedModel, new Vector3f(0, 0, -1), 0, 0, 0, 1);
         Camera camera = new Camera();
 
+        float pps = 50;
+        float ppsChange = 1;
+        float speed = 25;
+        float speedChange = 1;
+        float gravityComplient = 0.3f;
+        float gravityComplientChange = 0.05f;
+        float lifeLength = 4;
+        float lifeLengthChange = 0.2f;
+        float scale = 1;
+        float scaleChange = 0.1f;
+
+        Vector3f direction = new Vector3f(0, 1, 0);
+        float directionError = 0.1f;
+        float lifeError = 0.1f;
+        float speedError = 0.4f;
+        float scaleError = 0.4f;
+
+        ParticleSystem system = new ParticleSystem(pps, speed, gravityComplient, lifeLength, scale);
+        system.randomizeRotation();
+        system.setDirection(direction, directionError);
+        system.setLifeError(lifeError);
+        system.setSpeedError(speedError);
+        system.setScaleError(scaleError);
+
+
         while(!Display.isCloseRequested()){//Основной цикл рендеринга
             //entity.increasePosition(0, 0, -0.02f);
             //entity.increaseRotation(-1, 1, 0.5f);
@@ -52,16 +84,56 @@ public class MainGameLoop {
             camera.move();
             renderer.preapare();
 
-            shader.start();
-            shader.loadViewMatrix(camera);
-            renderer.render(entity, shader);
-            shader.stop();
+            if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
+                if(Keyboard.isKeyDown(Keyboard.KEY_1)) {
+                    pps -= ppsChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_2)) {
+                    speed -= speedChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_3)) {
+                    gravityComplient -= gravityComplientChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_4)) {
+                    lifeLength -= lifeLengthChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_5)) {
+                    scale -= scaleChange;
+                }
+            }
+            else {
+                if(Keyboard.isKeyDown(Keyboard.KEY_1)) {
+                    pps += ppsChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_2)) {
+                    speed += speedChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_3)) {
+                    gravityComplient += gravityComplientChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_4)) {
+                    lifeLength += lifeLengthChange;
+                }
+                if(Keyboard.isKeyDown(Keyboard.KEY_5)) {
+                    scale += scaleChange;
+                }
+            }
+            system.setAll(pps, speed, gravityComplient, lifeLength, scale);
+
+            system.generateParticles(new Vector3f(0, 0, 0));
+            ParticleMaster.update();
+            modelShader.start();
+            modelShader.loadViewMatrix(camera);
+            renderer.render(entity, modelShader);
+            modelShader.stop();
+            ParticleMaster.renderParticles(camera);
 
             DisplayManager.updateDisplay();
 
         }
 
-        shader.cleanUp();
+        ParticleMaster.cleanUp();
+        modelShader.cleanUp();
         loader.cleanUp();
         DisplayManager.closeDisplay();
     }

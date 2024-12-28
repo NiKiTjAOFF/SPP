@@ -59,4 +59,8 @@ public class ModelRenderer {
         GL20.glDisableVertexAttribArray(1);
         GL30.glBindVertexArray(0);//Прекращаем обращение к VAO
     }
+
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
 }
