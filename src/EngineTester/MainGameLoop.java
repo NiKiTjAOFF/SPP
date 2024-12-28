@@ -62,6 +62,8 @@ public class MainGameLoop {
         float lifeLengthChange = 0.2f;
         float scale = 1;
         float scaleChange = 0.1f;
+        Vector3f startColor = new Vector3f(1, 0, 0);
+        Vector3f endColor = new Vector3f(0, 0, 1);
 
         Vector3f direction = new Vector3f(0, 1, 0);
         float directionError = 0.1f;
@@ -69,7 +71,7 @@ public class MainGameLoop {
         float speedError = 0.4f;
         float scaleError = 0.4f;
 
-        ParticleSystem system = new ParticleSystem(pps, speed, gravityComplient, lifeLength, scale);
+        ParticleSystem system = new ParticleSystem(pps, speed, gravityComplient, lifeLength, scale, startColor, endColor);
         system.randomizeRotation();
         system.setDirection(direction, directionError);
         system.setLifeError(lifeError);
@@ -118,7 +120,7 @@ public class MainGameLoop {
                     scale += scaleChange;
                 }
             }
-            system.setAll(pps, speed, gravityComplient, lifeLength, scale);
+            system.setAll(pps, speed, gravityComplient, lifeLength, scale, startColor, endColor);
 
             system.generateParticles(new Vector3f(0, 0, 0));
             ParticleMaster.update();

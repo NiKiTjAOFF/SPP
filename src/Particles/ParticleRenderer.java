@@ -44,6 +44,9 @@ public class ParticleRenderer {
         Matrix4f viewMatrix = Maths.createViewMatrix(camera);
         prepare();
         for(Particle particle : particles) {
+            shader.loadLifePercentage(particle.getLifePercentage());
+            shader.loadStartColor(particle.getStartColor());
+            shader.loadEndColor(particle.getEndColor());
             updateModelViewMatrix(particle.getPosition(), particle.getRotation(), particle.getScale(), viewMatrix);
             GL11.glDrawElements(GL11.GL_TRIANGLES, quad.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
         }

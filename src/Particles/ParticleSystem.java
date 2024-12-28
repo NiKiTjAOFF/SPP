@@ -11,17 +11,21 @@ public class ParticleSystem {
 
     private float pps, averageSpeed, gravityComplient, averageLifeLength, averageScale;
     private float speedError, lifeError, scaleError = 0;
+    private Vector3f startColor, endColor;
     private boolean randomRotation = false;
     private Vector3f direction;
     private float directionDeviation = 0;
     private Random random = new Random();
 
-    public ParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, float scale) {
+    public ParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, float scale,
+                          Vector3f startColor, Vector3f endColor) {
         this.pps = pps;
         this.averageSpeed = speed;
         this.gravityComplient = gravityComplient;
         this.averageLifeLength = lifeLength;
         this.averageScale = scale;
+        this.startColor = startColor;
+        this.endColor = endColor;
     }
 
     public void setDirection(Vector3f direction, float deviation) {
@@ -69,7 +73,8 @@ public class ParticleSystem {
         velocity.scale(generateValue(averageSpeed, speedError));
         float scale = generateValue(averageScale, scaleError);
         float lifeLength = generateValue(averageLifeLength, lifeError);
-        new Particle(new Vector3f(center), velocity, gravityComplient, lifeLength, generateRotation(), scale);
+        new Particle(new Vector3f(center), velocity, gravityComplient, lifeLength, generateRotation(), scale,
+                startColor, endColor);
     }
 
     private float generateValue(float average, float errorMargin) {
@@ -118,12 +123,15 @@ public class ParticleSystem {
         return new Vector3f(x, y, z);
     }
 
-    public void setAll(float pps, float speed, float gravityComplient, float lifeLength, float scale) {
+    public void setAll(float pps, float speed, float gravityComplient, float lifeLength, float scale,
+                       Vector3f startColor, Vector3f endColor) {
         this.pps = pps;
         this.averageSpeed = speed;
         this.gravityComplient = gravityComplient;
         this.averageLifeLength = lifeLength;
         this.averageScale = scale;
+        this.startColor = startColor;
+        this.endColor = endColor;
     }
 }
 
