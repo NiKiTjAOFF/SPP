@@ -1,7 +1,10 @@
 package EngineTester;
 
+import entities.Camera;
+import entities.Entity;
 import models.TexturedModel;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 import renderEngine.ModelLoader;
 import renderEngine.ModelRenderer;
@@ -13,8 +16,8 @@ public class MainGameLoop {
     public static void main(String[] args) {
         DisplayManager.createDisplay();
         ModelLoader loader = new ModelLoader();
-        ModelRenderer renderer = new ModelRenderer();
         StaticShader shader = new StaticShader();
+        ModelRenderer renderer = new ModelRenderer(shader);
 
         //Вершины для отрисовки квадрата. Квадрат - 2 полигона, для которых вершины указываются против часовой стрелки.
         //Поэтому указываем левую верхнюю, левую нижнюю, правую верхнюю. После правую верхнюю, левую нижнюю, правую нижнюю.
@@ -39,12 +42,19 @@ public class MainGameLoop {
         RawModel quad = loader.loadToVAO(vertices, textureCoords, indices);//Создание 3д модели на основе индексированных вершин
         ModelTexture texture = new ModelTexture(loader.loadTexture("test"));//Загрузка текстуры
         TexturedModel texturedModel = new TexturedModel(quad, texture);//Добавление текстуры 3д модели
+        Entity entity = new Entity(texturedModel, new Vector3f(0, 0, -1), 0, 0, 0, 1);
+        Camera camera = new Camera();
 
         while(!Display.isCloseRequested()){//Основной цикл рендеринга
+            //entity.increasePosition(0, 0, -0.02f);
+            //entity.increaseRotation(-1, 1, 0.5f);
+            //entity.increaseScale(0.002f);
+            camera.move();
             renderer.preapare();
 
             shader.start();
-            renderer.render(texturedModel);
+            shader.loadViewMatrix(camera);
+            renderer.render(entity, shader);
             shader.stop();
 
             DisplayManager.updateDisplay();

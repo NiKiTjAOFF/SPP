@@ -12,9 +12,9 @@ public class DisplayManager {
     //Создаёт дисплей при начале программы
     public static void createDisplay(){
 
-        ContextAttribs attribs = new ContextAttribs(3, 2);//Версия OpenGL, которая используется
-        attribs.withForwardCompatible(true);//Настройки
-        attribs.withProfileCompatibility(true);//Настройки
+        ContextAttribs attribs = new ContextAttribs(3, 2)//Версия OpenGL, которая используется
+        .withForwardCompatible(true)//Настройки
+        .withProfileCompatibility(true);//Настройки
 
         try {
             Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));//Определяет размеры экрана
