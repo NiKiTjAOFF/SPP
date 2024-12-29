@@ -10,12 +10,16 @@ import java.util.Random;
 public class ParticleSystem {
 
     private float pps, averageSpeed, gravityComplient, averageLifeLength, averageScale;
-    private float speedError, lifeError, scaleError = 0;
     private Vector3f startColor, endColor;
-    private boolean randomRotation = false;
+    private float speedError, lifeError, scaleError = 0, directionError = 0;
     private Vector3f direction;
-    private float directionDeviation = 0;
+    private boolean randomRotation = false;
+    private Vector3f positiveBounds, negativeBounds;
     private Random random = new Random();
+    public final int PULSE = 0, CONSTANT_EMITTING = 1;
+    public final int HARD_AREA = 0, SOFT_AREA = 1, DOT = 2;
+    private final float SECOND = 1;
+    private float timePassed = 0;
 
     public ParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, float scale,
                           Vector3f startColor, Vector3f endColor) {
@@ -28,56 +32,86 @@ public class ParticleSystem {
         this.endColor = endColor;
     }
 
-    public void setDirection(Vector3f direction, float deviation) {
-        this.direction = new Vector3f(direction);
-        this.directionDeviation = (float) (deviation * Math.PI);
-    }
 
-    public void randomizeRotation() {
-        randomRotation = true;
-    }
 
-    public void setSpeedError(float error) {
-        this.speedError = error * averageSpeed;
-    }
-
-    public void setLifeError(float error) {
-        this.lifeError = error * averageLifeLength;
-    }
-
-    public void setScaleError(float error) {
-        this.scaleError = error * averageScale;
-    }
-
-    public void generateParticles(Vector3f systemCenter) {
-        float delta = DisplayManager.getFrameTimeSeconds();
-        float particlesToCreate = pps * delta;
-        int count = (int) Math.floor(particlesToCreate);
-        float partialParticle = particlesToCreate % 1;
-        for (int i = 0; i < count; i++) {
-            emitParticle(systemCenter);
+    public void generateParticles(Vector3f systemCenter, Vector3f positiveBounds, Vector3f negativeBounds,
+                                  int particleEmittingType, int particleSpawnArea) {
+        if(particleEmittingType == PULSE) {
+            if(timePassed > SECOND) {
+                for (int i = 0; i < pps; i++) {
+                    emitParticle(systemCenter, positiveBounds, negativeBounds, particleSpawnArea);
+                }
+                timePassed = 0;
+                return;
+            }
+            timePassed += DisplayManager.getFrameTimeSeconds();
         }
-        if (Math.random() < partialParticle) {
-            emitParticle(systemCenter);
+        else if (particleEmittingType == CONSTANT_EMITTING) {
+            float particlesToCreate = pps * DisplayManager.getFrameTimeSeconds();
+            int count = (int) Math.floor(particlesToCreate);
+            for (int i = 0; i < count; i++) {
+                emitParticle(systemCenter, positiveBounds, negativeBounds, particleSpawnArea);
+            }
+            float partialParticle = particlesToCreate % 1;
+            if (Math.random() < partialParticle) {
+                emitParticle(systemCenter, positiveBounds, negativeBounds, particleSpawnArea);
+            }
         }
     }
 
-    private void emitParticle(Vector3f center) {
+    private void emitParticle(Vector3f center, Vector3f positiveBounds, Vector3f negativeBounds, int particleSpawnArea) {
         Vector3f velocity = null;
-        if(direction!=null){
-            velocity = generateRandomUnitVectorWithinCone(direction, directionDeviation);
+        if(direction!=null && !direction.equals(new Vector3f(0, 0, 0))){
+            velocity = generateRandomUnitVectorWithinCone(direction, directionError);
         }else{
             velocity = generateRandomUnitVector();
         }
         velocity.normalise();
-        velocity.scale(generateValue(averageSpeed, speedError));
-        float scale = generateValue(averageScale, scaleError);
-        float lifeLength = generateValue(averageLifeLength, lifeError);
-        new Particle(new Vector3f(center), velocity, gravityComplient, lifeLength, generateRotation(), scale,
-                startColor, endColor);
+        velocity.scale(generateDeviation(averageSpeed, speedError));
+        float scale = generateDeviation(averageScale, scaleError);
+        float lifeLength = generateDeviation(averageLifeLength, lifeError);
+        if (particleSpawnArea == HARD_AREA) {
+            Vector3f particlePos = generatePositionInHardBounds(center, positiveBounds, negativeBounds);
+            new Particle(new Vector3f(particlePos), velocity, gravityComplient, lifeLength, generateRotation(), scale,
+                    startColor, endColor);
+        }
+        if (particleSpawnArea == SOFT_AREA) {
+            Vector3f particlePos = generatePositionInSoftBounds(center, positiveBounds, negativeBounds);
+            new Particle(new Vector3f(particlePos), velocity, gravityComplient, lifeLength, generateRotation(), scale,
+                    startColor, endColor);
+        }
+        else if (particleSpawnArea == DOT) {
+            new Particle(new Vector3f(center), velocity, gravityComplient, lifeLength, generateRotation(), scale,
+                    startColor, endColor);
+        }
+
     }
 
-    private float generateValue(float average, float errorMargin) {
+    //Параллелепипедная форма
+    private Vector3f generatePositionInHardBounds(Vector3f center, Vector3f positiveBounds, Vector3f negativeBounds) {
+        float x = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + center.x;
+        float y = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + center.y;
+        float z = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + center.z;
+        return new Vector3f(x, y, z);
+    }
+
+    //Эллипсоидовидная форма
+    private Vector3f generatePositionInSoftBounds(Vector3f center, Vector3f positiveBounds, Vector3f negativeBounds) {
+        float theta = random.nextFloat() * (float) Math.PI;
+        float phi = random.nextFloat() * 2 * (float) Math.PI;
+
+        float a = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + center.x;
+        float b = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + center.y;
+        float c = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + center.z;
+
+        float x = (float) (a * Math.sin(theta) * Math.cos(phi));
+        float y = (float) (b * Math.sin(theta) * Math.sin(phi));
+        float z = (float) (c * Math.cos(theta));
+
+        return new Vector3f(x, y, z);
+    }
+
+    private float generateDeviation(float average, float errorMargin) {
         float offset = (random.nextFloat() - 0.5f) * 2f * errorMargin;
         return average + offset;
     }
@@ -90,6 +124,7 @@ public class ParticleSystem {
         }
     }
 
+    //Направление частиц в границах конуса
     private static Vector3f generateRandomUnitVectorWithinCone(Vector3f coneDirection, float angle) {
         float cosAngle = (float) Math.cos(angle);
         Random random = new Random();
@@ -114,6 +149,7 @@ public class ParticleSystem {
         return new Vector3f(direction);
     }
 
+    //Рандомное направление частиц
     private Vector3f generateRandomUnitVector() {
         float theta = (float) (random.nextFloat() * 2f * Math.PI);
         float z = (random.nextFloat() * 2) - 1;
@@ -123,7 +159,8 @@ public class ParticleSystem {
         return new Vector3f(x, y, z);
     }
 
-    public void setAll(float pps, float speed, float gravityComplient, float lifeLength, float scale,
+    //Устанавливает свойства частицы
+    public void setParticle(float pps, float speed, float gravityComplient, float lifeLength, float scale,
                        Vector3f startColor, Vector3f endColor) {
         this.pps = pps;
         this.averageSpeed = speed;
@@ -133,5 +170,15 @@ public class ParticleSystem {
         this.startColor = startColor;
         this.endColor = endColor;
     }
-}
 
+    //Устанавливает погрешность и направление движения частицы
+    public void setUtils(Vector3f direction, float directionError, boolean randomRotation, float speedError,
+                         float lifeError, float scaleError) {
+        this.direction = new Vector3f(direction);
+        this.directionError = (float) (directionError * Math.PI);
+        this.randomRotation = randomRotation;
+        this.speedError = speedError * averageSpeed;
+        this.lifeError = lifeError * averageLifeLength;
+        this.scaleError = scaleError * averageScale;
+    }
+}
