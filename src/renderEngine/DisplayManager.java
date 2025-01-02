@@ -3,19 +3,21 @@ package renderEngine;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.DisplayMode;
+
+import java.awt.*;
 
 //Упрвление дисплеем (создание, обновление, удаление)
 public class DisplayManager {
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
+    public static final int WIDTH = 500;
+    public static final int HEIGHT = 500;
     private static final int FPS_CAP = 120;
     private static final String TITLE = "Particle Editor";
     private static long lastFrameTime;
     private static float delta;
 
-
     //Создаёт дисплей при начале программы
-    public static void createDisplay(){
+    public static void createDisplay(Canvas canvas){
 
         ContextAttribs attribs = new ContextAttribs(3, 2)//Версия OpenGL, которая используется
         .withForwardCompatible(true)//Настройки
@@ -23,8 +25,10 @@ public class DisplayManager {
 
         try {
             Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));//Определяет размеры экрана
-            Display.create(new PixelFormat(), attribs);//Создание дисплея
+            canvas.setSize(WIDTH, HEIGHT);
+            Display.setParent(canvas);
             Display.setTitle(TITLE);//Указать название окна
+            Display.create(new PixelFormat(), attribs);//Создание дисплея
         } catch (LWJGLException e) {
             throw new RuntimeException(e);
         }

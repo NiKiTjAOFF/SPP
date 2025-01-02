@@ -47,7 +47,7 @@ public class Camera {
                 pitch = PITCH_LIMIT;
             }
             if(pitch < -PITCH_LIMIT) {
-                pitch = PITCH_LIMIT;
+                pitch = -PITCH_LIMIT;
             }
         }
 

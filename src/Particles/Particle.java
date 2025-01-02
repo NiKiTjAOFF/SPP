@@ -3,6 +3,8 @@ package Particles;
 import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 
+import java.util.ArrayList;
+
 public class Particle {
     private Vector3f position;
     private Vector3f velocity;
@@ -12,19 +14,17 @@ public class Particle {
     private float rotation;
     private float scale;
     private float elapsedTime = 0;
-    private Vector3f startColor;
-    private Vector3f endColor;
+    private ArrayList<Vector3f> colors;
 
     public Particle(Vector3f position, Vector3f velocity, float gravityEffect, float lifeLength, float rotation,
-                    float scale, Vector3f startColor, Vector3f endColor) {
+                    float scale, ArrayList<Vector3f> colors) {
         this.position = position;
         this.velocity = velocity;
         this.gravityEffect = gravityEffect;
         this.lifeLength = lifeLength;
         this.rotation = rotation;
         this.scale = scale;
-        this.startColor = startColor;
-        this.endColor = endColor;
+        this.colors = colors;
         ParticleMaster.addParticle(this);
     }
 
@@ -44,12 +44,8 @@ public class Particle {
         return elapsedTime / lifeLength;
     }
 
-    public Vector3f getStartColor() {
-        return startColor;
-    }
-
-    public Vector3f getEndColor() {
-        return endColor;
+    public ArrayList<Vector3f> getColors() {
+        return colors;
     }
 
     protected boolean update() {

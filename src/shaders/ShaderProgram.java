@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 
 //Содержит все поля и методы для люого шейдера
 public abstract class ShaderProgram {
@@ -72,6 +73,21 @@ public abstract class ShaderProgram {
     //Загрузить вектор из 3 вещественных чисел в униформу
     protected void loadVector(int location, Vector3f vector) {
         GL20.glUniform3f(location, vector.x, vector.y, vector.z);
+    }
+
+    protected void loadVectors(int location, ArrayList<Vector3f> vectors) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(vectors.size() * 3);
+        for(Vector3f vector : vectors) {
+            buffer.put(vector.x);
+            buffer.put(vector.y);
+            buffer.put(vector.z);
+        }
+        buffer.flip();
+        GL20.glUniform3(location, buffer);
+    }
+
+    protected void loadInt(int location, int value) {
+        GL20.glUniform1i(location, value);
     }
 
     //Загуризить логическое значение, true - 1.0f, false - 0.0f
