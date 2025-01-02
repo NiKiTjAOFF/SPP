@@ -4,6 +4,8 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import shaders.ShaderProgram;
 
+import java.util.ArrayList;
+
 public class ParticleShader extends ShaderProgram {
 
     private static final String VERTEX_FILE = "src/particles/particleVShader.glsl";
@@ -11,8 +13,8 @@ public class ParticleShader extends ShaderProgram {
     private int location_modelViewMatrix;
     private int location_projectionMatrix;
     private int location_lifePercentage;
-    private int location_startColor;
-    private int location_endColor;
+    private int location_colors;
+    private int location_colorsLength;
 
     public ParticleShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -23,8 +25,8 @@ public class ParticleShader extends ShaderProgram {
         location_modelViewMatrix = super.getUniformLocation("modelViewMatrix");
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_lifePercentage = super.getUniformLocation("lifePercentage");
-        location_startColor = super.getUniformLocation("startColor");
-        location_endColor = super.getUniformLocation("endColor");
+        location_colors = super.getUniformLocation("colors");
+        location_colorsLength = super.getUniformLocation("colorsLength");
     }
 
     @Override
@@ -44,11 +46,11 @@ public class ParticleShader extends ShaderProgram {
         super.loadFloat(location_lifePercentage, lifePercentage);
     }
 
-    protected void loadStartColor(Vector3f startColor) {
-        super.loadVector(location_startColor, startColor);
+    protected void loadColors(ArrayList<Vector3f> colors) {
+        super.loadVectors(location_colors, colors);
     }
 
-    protected void loadEndColor(Vector3f endColor) {
-        super.loadVector(location_endColor, endColor);
+    protected void loadColorsLength(int length) {
+        super.loadInt(location_colorsLength, length);
     }
 }
