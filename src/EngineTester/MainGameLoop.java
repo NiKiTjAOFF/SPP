@@ -65,35 +65,39 @@ public class MainGameLoop {
         float negativeXBound = -10 + particleEmittingCenter.x;
         float negativeYBound = -10 + particleEmittingCenter.y;
         float negativeZBound = -10 + particleEmittingCenter.z;
+        float pullCenterX = 5;
+        float pullCenterY = 5;
+        float pullCenterZ = 5;
         Vector3f particlePositiveBounds;
         Vector3f particleNegativeBounds;
+        Vector3f pullCenter;
         float pps = 50f;
         float ppsChange = 1f;
         float speed = 0f;
         float speedChange = 1f;
         float gravityComplient = 0f;
-        float gravityComplientChange = 0f;
+        float gravityComplientChange = 0.002f;
         float lifeLength = 0.2f;
         float lifeLengthChange = 0.2f;
         float scale = 1;
         //Colors
         float scaleChange = 0.1f;
         ArrayList<ArrayList<Float>> colorsRGB = new ArrayList<>();
-        colorsRGB.add(new ArrayList<>(Arrays.asList(0f, 0f, 0f)));
-        colorsRGB.add(new ArrayList<>(Arrays.asList(0f, 0f, 1f)));
-        colorsRGB.add(new ArrayList<>(Arrays.asList(0f, 0f, 0f)));
         colorsRGB.add(new ArrayList<>(Arrays.asList(1f, 0f, 0f)));
+        colorsRGB.add(new ArrayList<>(Arrays.asList(1f, 0.5f, 0f)));
+        colorsRGB.add(new ArrayList<>(Arrays.asList(0f, 0f, 0f)));
+        colorsRGB.add(new ArrayList<>(Arrays.asList(0f, 0.5f, 1f)));
         ArrayList<Vector3f> colors = new ArrayList<>();
         for(int i = 0; i < colorsRGB.size(); i++) {
             colors.add(new Vector3f(colorsRGB.get(i).get(0), colorsRGB.get(i).get(1), colorsRGB.get(i).get(2)));
         }
 
         //Particle utils
-        float directionX = -1;
+        float directionX = 0;
         float directionY = 0;
         float directionZ = 0;
         Vector3f direction;
-        float directionError = 1f;
+        float directionError = 0.2f;
         boolean randomRotation = true;
         float lifeError = 0.1f;
         float speedError = 0.f;
@@ -105,6 +109,7 @@ public class MainGameLoop {
         int particleEmittingType = 0;
         int spawnAreaType = 0;
         int spawnBounds = 0;
+        int directionType = 0;
 
         ParticleSystem system = new ParticleSystem(pps, speed, gravityComplient, lifeLength, scale, colors);
         ParticleMaster.init(loader, renderer.getProjectionMatrix());
@@ -208,6 +213,7 @@ public class MainGameLoop {
             particleEmittingCenter = new Vector3f(spawnPointX, spawnPointY, spawnPointZ);
             particlePositiveBounds = new Vector3f(positiveXBound, positiveYBound, positiveZBound);
             particleNegativeBounds = new Vector3f(negativeXBound, negativeYBound, negativeZBound);
+            pullCenter = new Vector3f(pullCenterX, pullCenterY, pullCenterZ);
             for(int i = 0; i < colorsRGB.size(); i++) {
                 colors.get(i).set(colorsRGB.get(i).get(0), colorsRGB.get(i).get(1), colorsRGB.get(i).get(2));
             }
@@ -215,8 +221,8 @@ public class MainGameLoop {
 
             system.setParticle(pps, speed, gravityComplient, lifeLength, scale, colors);
             system.setUtils(direction, directionError, randomRotation, speedError, lifeError, scaleError,
-                    particlePulsesASecond, particleEmittingCenter, particlePositiveBounds, particleNegativeBounds,
-                    particleEmittingType, spawnAreaType, spawnBounds);
+                    particlePulsesASecond, particleEmittingCenter, particlePositiveBounds, particleNegativeBounds, pullCenter,
+                    particleEmittingType, spawnAreaType, spawnBounds, directionType);
             system.generateParticles();
             ParticleMaster.update();
 
