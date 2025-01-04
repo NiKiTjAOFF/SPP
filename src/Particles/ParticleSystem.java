@@ -21,21 +21,12 @@ public class ParticleSystem {
     private Vector3f pullCenter = new Vector3f(0, 0, 0);
     private int particleEmittingType = 0, spawnAreaType = 0, spawnBounds = 0, directionType = 0;
     private Random random = new Random();
-    public final int PULSE = 0, CONSTANT_EMITTING = 1, PARTICLE_EMITTING_TYPE_NUMBER = 2;
-    public final int HARD_AREA = 0, SOFT_AREA = 1, DOT = 2, SPAWN_AREA_NUMBER = 3;
-    public final int IN_BOUNDS = 0, SPAWN_BOUNDS_NUMBER = 1;
-    public final int TO_DOT = 0, CONE_DIRECTION = 1, OUT_OF_CENTRE = 2;
+    public static final int PULSE = 0, CONSTANT_EMITTING = 1, PARTICLE_EMITTING_TYPE_NUMBER = 2;
+    public static final int HARD_AREA = 0, SOFT_AREA = 1, DOT = 2, SPAWN_AREA_NUMBER = 3;
+    public static final int IN_BOUNDS = 0, SPAWN_BOUNDS_NUMBER = 1;
+    public static final int TO_DOT = 0, CONE_DIRECTION = 1, OUT_OF_CENTRE = 2;
     private final float SECOND = 1;
     private float timePassed = 0;
-
-    public ParticleSystem(float pps, float speed, float gravityComplient, float lifeLength, float scale, ArrayList<Vector3f> colors) {
-        this.pps = pps;
-        this.averageSpeed = speed;
-        this.gravityComplient = gravityComplient;
-        this.averageLifeLength = lifeLength;
-        this.averageScale = scale;
-        this.colors = colors;
-    }
 
     public void generateParticles() {
         if (particleEmittingType == PULSE) {
@@ -61,10 +52,49 @@ public class ParticleSystem {
     }
 
     private void emitParticle() {
-        Vector3f velocity = new Vector3f();
         Vector3f particlePos = generatePositionInBounds();
         float lifeLength = generateDeviation(averageLifeLength, lifeError);
-        if (this.directionType == TO_DOT) {
+        Vector3f velocity = generateDirectionWithSpeed(particlePos, lifeLength);
+        float scale = generateDeviation(averageScale, scaleError);
+        new Particle(new Vector3f(particlePos), velocity, gravityComplient, lifeLength, generateRotation(), scale, colors);
+    }
+
+    private Vector3f generatePositionInBounds() {
+        float x = 0, y = 0, z = 0;
+        //Параллелепипедная форма
+        if (spawnAreaType == HARD_AREA) {
+            if (spawnBounds == IN_BOUNDS) {
+                x = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + systemCenter.x;
+                y = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + systemCenter.y;
+                z = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + systemCenter.z;
+            }
+        }
+        //Эллипсоидовидная форма
+        else if (spawnAreaType == SOFT_AREA) {
+            float theta = random.nextFloat() * (float) Math.PI;
+            float phi = random.nextFloat() * 2 * (float) Math.PI;
+            float a = 0, b = 0, c = 0;
+            if (spawnBounds == IN_BOUNDS) {
+                a = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + systemCenter.x;
+                b = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + systemCenter.y;
+                c = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + systemCenter.z;
+            }
+            x = (float) (a * Math.sin(theta) * Math.cos(phi));
+            y = (float) (b * Math.sin(theta) * Math.sin(phi));
+            z = (float) (c * Math.cos(theta));
+        }
+        //Появление из точки
+        else if (spawnAreaType == DOT) {
+            x = systemCenter.x;
+            y = systemCenter.y;
+            z = systemCenter.z;
+        }
+        return new Vector3f(x, y, z);
+    }
+
+    private Vector3f generateDirectionWithSpeed(Vector3f particlePos, float lifeLength) {
+        Vector3f velocity = new Vector3f();
+        if (this.directionType == TO_DOT && !direction.equals(new Vector3f(0, 0, 0))) {
             velocity.x = pullCenter.x - particlePos.x;
             velocity.y = pullCenter.y - particlePos.y;
             velocity.z = pullCenter.z - particlePos.z;
@@ -109,41 +139,7 @@ public class ParticleSystem {
             velocity.normalise();
             velocity.scale(generateDeviation(averageSpeed, speedError));
         }
-        float scale = generateDeviation(averageScale, scaleError);
-        new Particle(new Vector3f(particlePos), velocity, gravityComplient, lifeLength, generateRotation(), scale, colors);
-    }
-
-    private Vector3f generatePositionInBounds() {
-        float x = 0, y = 0, z = 0;
-        //Параллелепипедная форма
-        if (spawnAreaType == HARD_AREA) {
-            if (spawnBounds == IN_BOUNDS) {
-                x = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + systemCenter.x;
-                y = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + systemCenter.y;
-                z = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + systemCenter.z;
-            }
-        }
-        //Эллипсоидовидная форма
-        else if (spawnAreaType == SOFT_AREA) {
-            float theta = random.nextFloat() * (float) Math.PI;
-            float phi = random.nextFloat() * 2 * (float) Math.PI;
-            float a = 0, b = 0, c = 0;
-            if (spawnBounds == IN_BOUNDS) {
-                a = random.nextFloat() * (positiveBounds.x - negativeBounds.x) + negativeBounds.x + systemCenter.x;
-                b = random.nextFloat() * (positiveBounds.y - negativeBounds.y) + negativeBounds.y + systemCenter.y;
-                c = random.nextFloat() * (positiveBounds.z - negativeBounds.z) + negativeBounds.z + systemCenter.z;
-            }
-            x = (float) (a * Math.sin(theta) * Math.cos(phi));
-            y = (float) (b * Math.sin(theta) * Math.sin(phi));
-            z = (float) (c * Math.cos(theta));
-        }
-        //Появление из точки
-        else if (spawnAreaType == DOT) {
-            x = systemCenter.x;
-            y = systemCenter.y;
-            z = systemCenter.z;
-        }
-        return new Vector3f(x, y, z);
+        return velocity;
     }
 
     private float generateDeviation(float average, float errorMargin) {

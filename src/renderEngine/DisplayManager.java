@@ -9,8 +9,8 @@ import java.awt.*;
 
 //Упрвление дисплеем (создание, обновление, удаление)
 public class DisplayManager {
-    public static final int WIDTH = 500;
-    public static final int HEIGHT = 500;
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 800;
     private static final int FPS_CAP = 120;
     private static final String TITLE = "Particle Editor";
     private static long lastFrameTime;

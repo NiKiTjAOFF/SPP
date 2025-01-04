@@ -35,10 +35,10 @@ public class Camera {
             angleAroundObject += CAMERA_SPEED;
         }
 
-//        if(Mouse.isButtonDown(1)) {
-//            float angleChange = Mouse.getDX() * MOUSE_CHANGE_RATE;
-//            angleAroundObject += angleChange;
-//        }
+        if(Mouse.isButtonDown(1)) {
+            float angleChange = Mouse.getDX() * MOUSE_CHANGE_RATE;
+            angleAroundObject += angleChange;
+        }
 
         if(Mouse.isButtonDown(0)) {
             float pitchChange = Mouse.getDY() * MOUSE_CHANGE_RATE;
