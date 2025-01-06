@@ -94,7 +94,7 @@ public class ParticleSystem {
 
     private Vector3f generateDirectionWithSpeed(Vector3f particlePos, float lifeLength) {
         Vector3f velocity = new Vector3f();
-        if (this.directionType == TO_DOT && !direction.equals(new Vector3f(0, 0, 0))) {
+        if (this.directionType == TO_DOT && !pullCenter.equals(new Vector3f(0, 0, 0))) {
             velocity.x = pullCenter.x - particlePos.x;
             velocity.y = pullCenter.y - particlePos.y;
             velocity.z = pullCenter.z - particlePos.z;

@@ -369,9 +369,9 @@ public class GUI extends JFrame implements ActionListener, ItemListener, ChangeL
         //Количество частиц в секунду
         ppsPanel = createPanel(1, 3, 2, 0);
         ppsLabel = new JLabel("Particles per second:");
-        ppsSlider = createSlider(1, 500, 1, 1, 25);
+        ppsSlider = createSlider(1, 5000, 1, 1, 25);
         ppsSlider.addChangeListener(this);
-        ppsSpinner = createSpinner(1, 1, 500, 1);
+        ppsSpinner = createSpinner(1, 1, 5000, 1);
         ppsPanel.add(ppsLabel);
         ppsPanel.add(ppsSlider);
         ppsPanel.add(ppsSpinner);
@@ -379,9 +379,9 @@ public class GUI extends JFrame implements ActionListener, ItemListener, ChangeL
         //Скорость частиц
         speedPanel = createPanel(1, 3, 2, 0);
         speedLabel = new JLabel("Particle speed:");
-        speedSlider = createSlider(0, 20000, 0, 1, 25);
+        speedSlider = createSlider(0, 50000, 0, 1, 25);
         speedSlider.addChangeListener(this);
-        speedSpinner = createSpinner(0f, -20.000f, 20.000f, 0.001f, 3);
+        speedSpinner = createSpinner(0f, 0.000f, 50.000f, 0.001f, 3);
         speedErrorPanel = createPanel(1, 3, 2,0);
         speedErrorLabel = new JLabel("Particle speed error:");
         speedErrorSlider = createSlider(0, 5000, 0, 1, 25);
@@ -543,34 +543,11 @@ public class GUI extends JFrame implements ActionListener, ItemListener, ChangeL
         scaleError = scaleErrorSlider.getValue() / 1000f;
         particlePulsesASecond = particlePulsesASecondSlider.getValue() / 1000f;
         colors = new ArrayList<>();
-        colors.add(new Vector3f(1, 1, 1));
         particleEmittingType = particleEmittingTypeComboBox.getSelectedIndex();
         spawnAreaType = spawnAreaTypeComboBox.getSelectedIndex();
         spawnBounds = spawnBoundsComboBox.getSelectedIndex();
         directionType = directionTypeComboBox.getSelectedIndex();
         randomRotation = randomRotationCheckBox.isSelected();
-        System.out.println(direction.toString());
-        System.out.println(directionError);
-        System.out.println(particleEmittingCenter.toString());
-        System.out.println(particlePositiveBounds.toString());
-        System.out.println(particleNegativeBounds.toString());
-        System.out.println(pullCenter.toString());
-        System.out.println(pps);
-        System.out.println(speed);
-        System.out.println(speedError);
-        System.out.println(gravityComplient);
-        System.out.println(lifeLength);
-        System.out.println(lifeLengthError);
-        System.out.println(scale);
-        System.out.println(scaleError);
-        System.out.println(particlePulsesASecond);
-        for(int i = 0; i < colors.size(); i++) {
-            System.out.println(colors.get(i).toString());
-        }
-        System.out.println(particleEmittingType);
-        System.out.println(spawnAreaType);
-        System.out.println(directionType);
-        System.out.println(randomRotation);
     }
 
     public static void setParticle(ParticleSystem system) {
@@ -603,7 +580,7 @@ public class GUI extends JFrame implements ActionListener, ItemListener, ChangeL
                 return;
             }
             Color color = JColorChooser.showDialog(null, "Pick a color", Color.white);
-            if (color.equals(null)) {
+            if (color == null) {
                 return;
             }
             float r, g, b;
@@ -611,15 +588,11 @@ public class GUI extends JFrame implements ActionListener, ItemListener, ChangeL
             g = (float) color.getGreen() / 255;
             b = (float) color.getBlue() / 255;
             colors.add(new Vector3f(r, g, b));
-
         }
         else if (e.getSource() == colorChooserButtonRemove) {
             if(colors.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "There's no colors to remove");
                 return;
-            }
-            for(int i = 0; i < colors.size(); i++) {
-                System.out.println(colors.get(i).toString());
             }
             colors.removeLast();
         }
